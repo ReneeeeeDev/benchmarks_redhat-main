@@ -3,7 +3,7 @@ from classes.compliance_check import ComplianceCheck
 
 
 class FreevxfsCheck(ComplianceCheck):
-    TITLE = "Ensure mounting of freevxfs filesystems is disabled"
+    TITLE = " Ensure freevxfs kernel module is not available (Automated)"
     NUMBER = "1.1.1.2"
     COMMANDS = [
         'modprobe -n -v freevxfs | grep "^install"',

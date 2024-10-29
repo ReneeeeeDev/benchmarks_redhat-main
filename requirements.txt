@@ -1,0 +1,5 @@
+lxml
+pandas
+jinja2
+pdfkit
+reportlab

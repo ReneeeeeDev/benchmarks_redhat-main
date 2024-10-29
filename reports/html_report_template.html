@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compliance Report</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 95%;
+            margin: auto;
+
+        }
+        #branding {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: #ffffff;
+            color: #333;
+        }
+        #branding img {
+            height: 80px;
+            margin-right: 20px;
+        }
+        h2 {
+            text-align: center;
+        }
+        .search-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .search-container input {
+            padding: 10px;
+            width: 50%;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #fff;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #00aaff;
+            color: #fff;
+        }
+        tr:nth-child(even) {
+            background-color: #e0f7fa;
+        }
+        tr:nth-child(odd) {
+            background-color: #ffffff;
+        }
+        .scoring {
+            text-align: right;
+            margin: 20px 0;
+        }
+        .execution-date {
+            text-align: right;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header id="branding">
+        <img src="../resources/ivera_logo.jpg" alt="iVera Logo">
+    </header>
+    <div class="container">
+        <h2>Compliance Report</h2>
+        <div class="execution-date">Execution Date: {{ execution_date }}</div>
+        <div class="scoring">
+            <span id="scoringLabel">Scoring: </span><br>
+            <span id="totalPolicies">Total Policies Executed: </span><br>
+            <span id="totalPassedPolicies">Total Policies Passed: </span>
+        </div>
+        <div class="search-container">
+            <div class="form-group">
+                <input type="text" class="form-control" id="titleSearch" placeholder="Search for Title.." onkeyup="searchTable()">
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" id="numberSearch" placeholder="Search for Number.." onkeyup="searchTable()">
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" id="profileSearch" placeholder="Search for Profile.." onkeyup="searchTable()">
+            </div>
+        </div>
+        <table id="complianceTable" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Number</th>
+                    <th>Commands</th>
+                    <th>Profile</th>
+                    <th>Description</th>
+                    <th>Pass</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                <tr>
+                    <td>{{ result.TITLE }}</td>
+                    <td>{{ result.NUMBER }}</td>
+                    <td>{{ result.COMMANDS }}</td>
+                    <td>{{ result.PROFILE }}</td>
+                    <td>{{ result.DESCRIPTION }}</td>
+                    <td>{{ result.PASSED }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            updateScoring();
+            document.getElementById('titleSearch').addEventListener('keyup', searchTable);
+            document.getElementById('numberSearch').addEventListener('keyup', searchTable);
+            document.getElementById('profileSearch').addEventListener('keyup', searchTable);
+        });
+
+        function searchTable() {
+            let inputTitle, inputNumber, inputProfile, filterTitle, filterNumber, filterProfile, table, tr, td, i, txtValue;
+            inputTitle = document.getElementById("titleSearch");
+            inputNumber = document.getElementById("numberSearch");
+            inputProfile = document.getElementById("profileSearch");
+            filterTitle = inputTitle.value.toUpperCase();
+            filterNumber = inputNumber.value.toUpperCase();
+            filterProfile = inputProfile.value.toUpperCase();
+            table = document.getElementById("complianceTable");
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 1; i < tr.length; i++) {
+                tr[i].style.display = "none";
+                td = tr[i].getElementsByTagName("td");
+                if (td) {
+                    var title = td[0].textContent || td[0].innerText;
+                    var number = td[1].textContent || td[1].innerText;
+                    var profile = td[3].textContent || td[3].innerText;
+                    if (title.toUpperCase().indexOf(filterTitle) > -1 &&
+                        number.toUpperCase().indexOf(filterNumber) > -1 &&
+                        profile.toUpperCase().indexOf(filterProfile) > -1) {
+                        tr[i].style.display = "";
+                    }
+                }
+            }
+            updateScoring();
+        }
+
+        function updateScoring() {
+            let table, tr, td, i, passedCount = 0, totalCount = 0;
+            table = document.getElementById("complianceTable");
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 1; i < tr.length; i++) {
+                if (tr[i].style.display !== "none") {
+                    totalCount++;
+                    td = tr[i].getElementsByTagName("td")[5];
+                    if (td && td.textContent.toLowerCase() === 'true') {
+                        passedCount++;
+                    }
+                }
+            }
+            let score = totalCount > 0 ? (passedCount / totalCount * 100).toFixed(2) : 0;
+            document.getElementById("scoringLabel").textContent = `Scoring: ${score}%`;
+            document.getElementById("totalPolicies").textContent = `Total Policies Executed: ${totalCount}`;
+            document.getElementById("totalPassedPolicies").textContent = `Total Policies Passed: ${passedCount}`;
+        }
+    </script>
+</body>
+</html>
